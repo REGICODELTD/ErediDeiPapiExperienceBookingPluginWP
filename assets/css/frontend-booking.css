@@ -152,7 +152,7 @@ body.edp-modal-open {
 .edp-modal__overlay {
 	position: absolute;
 	inset: 0;
-	background: rgba(0, 36, 53, 0.55);
+	background: var(--edp-overlay, rgba(0, 36, 53, 0.55));
 	backdrop-filter: blur(2px);
 }
 
@@ -164,7 +164,7 @@ body.edp-modal-open {
 	overflow-y: auto;
 	margin: 24px auto;
 	background: var(--edp-cream);
-	border-radius: 6px;
+	border-radius: var(--edp-dialog-radius, 6px);
 	box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
 	padding: 32px 28px 28px;
 	color: var(--edp-ink);
@@ -412,9 +412,9 @@ body.edp-modal-open {
 	font-weight: 600;
 	letter-spacing: 0.04em;
 	text-transform: uppercase;
-	color: #fff;
-	background: var(--edp-teal);
-	border: 1px solid var(--edp-teal);
+	color: var(--edp-btn-text, #fff);
+	background: var(--edp-btn-bg, var(--edp-teal));
+	border: 1px solid var(--edp-btn-bg, var(--edp-teal));
 	border-radius: var(--edp-radius);
 	padding: 14px 20px;
 	font-size: 0.95rem;
@@ -422,9 +422,9 @@ body.edp-modal-open {
 }
 
 .edp-submit:hover {
-	background: var(--edp-gold);
-	border-color: var(--edp-gold);
-	color: var(--edp-teal);
+	background: var(--edp-btn-bg-hover, var(--edp-gold));
+	border-color: var(--edp-btn-bg-hover, var(--edp-gold));
+	color: var(--edp-btn-text-hover, var(--edp-teal));
 }
 
 .edp-submit:disabled {
@@ -515,10 +515,16 @@ body.edp-modal-open {
 }
 
 .edp-book-btn:focus:not(:hover),
-.edp-submit:focus:not(:hover),
-.edp-book-btn:active,
-.edp-submit:active {
+.edp-book-btn:active {
 	background: var(--edp-teal);
 	border-color: var(--edp-teal);
 	color: #fff;
+}
+
+/* Submit mirrors the book button but honours the modal's custom colours. */
+.edp-submit:focus:not(:hover),
+.edp-submit:active {
+	background: var(--edp-btn-bg, var(--edp-teal));
+	border-color: var(--edp-btn-bg, var(--edp-teal));
+	color: var(--edp-btn-text, #fff);
 }
