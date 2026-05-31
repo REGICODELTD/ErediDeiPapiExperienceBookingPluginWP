@@ -21,12 +21,16 @@ class WidgetView {
 	 * Render the summary HTML for an experience.
 	 *
 	 * @param ExperienceProduct $product Experience.
-	 * @param array             $args    Display options.
+	 * @param array             $args    Display options. May carry a 'modal'
+	 *                                   array (copy + style) already sanitized
+	 *                                   by the caller; forwarded to the Registry
+	 *                                   so the shared modal can style itself per
+	 *                                   experience.
 	 * @return string
 	 */
 	public static function render( ExperienceProduct $product, array $args = array() ) {
 		Assets::ensure();
-		Registry::add( $product );
+		Registry::add( $product, ( isset( $args['modal'] ) && is_array( $args['modal'] ) ) ? $args['modal'] : array() );
 
 		$args = wp_parse_args(
 			$args,

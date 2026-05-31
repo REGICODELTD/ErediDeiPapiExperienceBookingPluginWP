@@ -26,16 +26,22 @@ class Registry {
 	private static $experiences = array();
 
 	/**
-	 * Add an experience to the registry (idempotent).
+	 * Add an experience to the registry (idempotent — first write wins).
+	 *
+	 * When several booking widgets target the same product on one page, the
+	 * first one rendered defines the shared modal's look & copy for that
+	 * experience (the modal element itself is a single shared node).
 	 *
 	 * @param ExperienceProduct $product Experience.
+	 * @param array             $modal   Per-experience modal copy + style
+	 *                                   (already sanitized by the caller).
 	 */
-	public static function add( ExperienceProduct $product ) {
+	public static function add( ExperienceProduct $product, array $modal = array() ) {
 		$id = $product->get_id();
 		if ( isset( self::$experiences[ $id ] ) ) {
 			return;
 		}
-		self::$experiences[ $id ] = self::build_config( $product );
+		self::$experiences[ $id ] = self::build_config( $product, $modal );
 	}
 
 	/**
@@ -60,9 +66,10 @@ class Registry {
 	 * Build the JS-facing config for an experience.
 	 *
 	 * @param ExperienceProduct $product Experience.
+	 * @param array             $modal   Per-experience modal copy + style.
 	 * @return array
 	 */
-	private static function build_config( ExperienceProduct $product ) {
+	private static function build_config( ExperienceProduct $product, array $modal = array() ) {
 		$availability = ( new AvailabilityService() )->get_frontend_availability( $product );
 
 		$upsells = array();
@@ -102,6 +109,7 @@ class Registry {
 			'max_persons'      => $product->get_max_persons(),
 			'upsells'          => $upsells,
 			'availability'     => $availability,
+			'modal'            => $modal,
 		);
 	}
 }
