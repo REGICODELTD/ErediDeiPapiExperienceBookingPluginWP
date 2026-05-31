@@ -463,3 +463,62 @@ body.edp-modal-open {
 		padding: 28px 18px 20px;
 	}
 }
+
+/* ---------- Button interaction hardening ----------
+   The steppers, close, book and submit buttons shipped with no :focus/
+   :active styling, so on the live site the theme, Elementor kit or browser
+   defaults could paint a stray (purple) tap-highlight, focus background or
+   text-selection colour over them. Lock every interactive state to brand
+   colours, kill the mobile tap-highlight and stop the glyphs being
+   selected. Keyboard focus still shows the subtle teal ring used by the
+   form inputs above. */
+.edp-book-btn,
+.edp-modal__close,
+.edp-step,
+.edp-submit {
+	-webkit-tap-highlight-color: transparent;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+}
+
+/* Pointer (mouse/touch) focus shows nothing... */
+.edp-book-btn:focus,
+.edp-modal__close:focus,
+.edp-step:focus,
+.edp-submit:focus {
+	outline: none;
+}
+
+/* ...keyboard focus shows the subtle teal ring (mirrors .edp-form input:focus). */
+.edp-book-btn:focus-visible,
+.edp-modal__close:focus-visible,
+.edp-step:focus-visible,
+.edp-submit:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px rgba(0, 36, 53, 0.12);
+}
+
+/* Re-assert backgrounds so a stray theme button:focus / :active can't win. */
+.edp-step:hover,
+.edp-step:focus,
+.edp-step:active {
+	background: var(--edp-cream);
+	color: var(--edp-teal);
+}
+
+.edp-modal__close:hover,
+.edp-modal__close:focus,
+.edp-modal__close:active {
+	background: transparent;
+	color: var(--edp-teal);
+}
+
+.edp-book-btn:focus:not(:hover),
+.edp-submit:focus:not(:hover),
+.edp-book-btn:active,
+.edp-submit:active {
+	background: var(--edp-teal);
+	border-color: var(--edp-teal);
+	color: #fff;
+}
