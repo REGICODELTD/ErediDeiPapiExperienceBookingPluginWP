@@ -1,0 +1,408 @@
+/**
+ * Front-end styles for the Experience booking widget + modal.
+ * Brand tokens are exposed as CSS custom properties so they can be overridden
+ * (e.g. via Elementor custom CSS or the theme).
+ */
+:root {
+	--edp-teal: #002435;
+	--edp-cream: #f9f7f3;
+	--edp-gold: #feca91;
+	--edp-ink: #1e1e1e;
+	--edp-gray: #7a7a7a;
+	--edp-border: #e6e1d8;
+	--edp-radius: 4px;
+	--edp-font-head: "Roboto Slab", "Cardo", Georgia, serif;
+	--edp-font-body: "Roboto", -apple-system, system-ui, sans-serif;
+}
+
+/* ---------- Widget summary ---------- */
+.edp-widget {
+	font-family: var(--edp-font-body);
+	color: var(--edp-ink);
+}
+
+.edp-widget .edp-price {
+	color: var(--edp-teal);
+	margin-bottom: 6px;
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.edp-widget .edp-price-prefix,
+.edp-widget .edp-price-suffix {
+	font-size: 0.8em;
+	color: var(--edp-gray);
+}
+
+.edp-widget .edp-price-amount {
+	font-family: var(--edp-font-head);
+	font-size: 1.7em;
+	font-weight: 600;
+}
+
+.edp-widget .edp-price-amount .woocommerce-Price-amount,
+.edp-widget .edp-price-amount bdi {
+	color: inherit;
+}
+
+.edp-widget .edp-persons-note {
+	color: var(--edp-gray);
+	font-size: 0.9em;
+	margin-bottom: 14px;
+}
+
+.edp-book-btn {
+	display: inline-block;
+	cursor: pointer;
+	font-family: var(--edp-font-body);
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	font-size: 0.95rem;
+	color: #fff;
+	background: var(--edp-teal);
+	border: 1px solid var(--edp-teal);
+	border-radius: var(--edp-radius);
+	padding: 14px 28px;
+	transition: background 0.2s ease, color 0.2s ease;
+}
+
+.edp-book-btn:hover {
+	background: var(--edp-gold);
+	border-color: var(--edp-gold);
+	color: var(--edp-teal);
+}
+
+/* ---------- Modal shell ---------- */
+body.edp-modal-open {
+	overflow: hidden;
+}
+
+.edp-modal {
+	display: none;
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	font-family: var(--edp-font-body);
+}
+
+.edp-modal.is-open {
+	display: block;
+}
+
+.edp-modal__overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 36, 53, 0.55);
+	backdrop-filter: blur(2px);
+}
+
+.edp-modal__dialog {
+	position: relative;
+	max-width: 560px;
+	width: calc(100% - 32px);
+	max-height: calc(100vh - 48px);
+	overflow-y: auto;
+	margin: 24px auto;
+	background: var(--edp-cream);
+	border-radius: 6px;
+	box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+	padding: 32px 28px 28px;
+	color: var(--edp-ink);
+}
+
+.edp-modal__close {
+	position: absolute;
+	top: 10px;
+	right: 12px;
+	width: 36px;
+	height: 36px;
+	border: 0;
+	background: transparent;
+	font-size: 28px;
+	line-height: 1;
+	color: var(--edp-teal);
+	cursor: pointer;
+}
+
+.edp-modal__title {
+	font-family: var(--edp-font-head);
+	color: var(--edp-teal);
+	font-size: 1.6rem;
+	margin: 0 0 18px;
+	padding-right: 32px;
+}
+
+/* ---------- Form ---------- */
+.edp-form .edp-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 12px 16px;
+}
+
+.edp-f {
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 4px;
+}
+
+.edp-f label,
+.edp-f > label {
+	font-size: 0.82rem;
+	font-weight: 600;
+	color: var(--edp-teal);
+	margin-bottom: 4px;
+}
+
+.edp-form input[type="text"],
+.edp-form input[type="email"],
+.edp-form input[type="tel"],
+.edp-form input[type="number"],
+.edp-form input[type="date"],
+.edp-form select {
+	width: 100%;
+	padding: 10px 12px;
+	border: 1px solid var(--edp-border);
+	border-radius: var(--edp-radius);
+	background: #fff;
+	font-size: 0.95rem;
+	color: var(--edp-ink);
+	box-sizing: border-box;
+}
+
+.edp-form input:focus,
+.edp-form select:focus {
+	outline: none;
+	border-color: var(--edp-teal);
+	box-shadow: 0 0 0 2px rgba(0, 36, 53, 0.12);
+}
+
+.edp-stepper {
+	display: flex;
+	align-items: stretch;
+}
+
+.edp-stepper input {
+	text-align: center;
+	border-radius: 0 !important;
+}
+
+.edp-step {
+	width: 42px;
+	border: 1px solid var(--edp-border);
+	background: #fff;
+	color: var(--edp-teal);
+	font-size: 18px;
+	cursor: pointer;
+}
+
+.edp-step:first-child {
+	border-radius: var(--edp-radius) 0 0 var(--edp-radius);
+}
+
+.edp-step:last-child {
+	border-radius: 0 var(--edp-radius) var(--edp-radius) 0;
+}
+
+.edp-hint {
+	color: var(--edp-gray);
+	font-size: 0.75rem;
+	margin-top: 3px;
+}
+
+/* Honeypot */
+.edp-hp {
+	position: absolute !important;
+	left: -9999px !important;
+	height: 0;
+	overflow: hidden;
+}
+
+/* Upsells */
+.edp-upsells {
+	margin: 8px 0 4px;
+}
+
+.edp-upsells-title {
+	font-family: var(--edp-font-head);
+	color: var(--edp-teal);
+	font-size: 1.05rem;
+	margin: 14px 0 8px;
+}
+
+.edp-upsell {
+	border: 1px solid var(--edp-border);
+	border-radius: var(--edp-radius);
+	padding: 10px 12px;
+	margin-bottom: 8px;
+	background: #fff;
+}
+
+.edp-upsell-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-weight: 600;
+	color: var(--edp-ink);
+	cursor: pointer;
+}
+
+.edp-upsell-options {
+	margin-top: 8px;
+	padding-top: 8px;
+	border-top: 1px dashed var(--edp-border);
+	display: grid;
+	gap: 6px;
+}
+
+.edp-opt {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 0.92rem;
+	color: var(--edp-gray);
+}
+
+.edp-opt--included em {
+	color: var(--edp-teal);
+	font-style: normal;
+	font-size: 0.8em;
+	background: var(--edp-cream);
+	padding: 1px 6px;
+	border-radius: 10px;
+}
+
+/* Fieldset */
+.edp-fieldset {
+	border: 0;
+	padding: 0;
+	margin: 14px 0 6px;
+}
+
+.edp-fieldset legend {
+	font-family: var(--edp-font-head);
+	color: var(--edp-teal);
+	font-size: 1.05rem;
+	padding: 0;
+	margin-bottom: 8px;
+}
+
+/* Privacy */
+.edp-privacy {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	font-size: 0.85rem;
+	color: var(--edp-gray);
+	margin: 12px 0;
+}
+
+.edp-privacy input {
+	margin-top: 3px;
+}
+
+.edp-privacy a {
+	color: var(--edp-teal);
+	text-decoration: underline;
+}
+
+/* Total */
+.edp-total {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	padding: 12px 0;
+	margin-top: 6px;
+	border-top: 1px solid var(--edp-border);
+}
+
+.edp-total-label {
+	font-weight: 600;
+	color: var(--edp-teal);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	font-size: 0.85rem;
+}
+
+.edp-total-amount {
+	font-family: var(--edp-font-head);
+	font-size: 1.5rem;
+	font-weight: 600;
+	color: var(--edp-teal);
+}
+
+/* Messages */
+.edp-message {
+	margin: 6px 0;
+	font-size: 0.9rem;
+}
+
+.edp-message--error {
+	color: #b32d2e;
+}
+
+.edp-message--info {
+	color: var(--edp-teal);
+}
+
+/* Submit */
+.edp-submit {
+	width: 100%;
+	cursor: pointer;
+	font-family: var(--edp-font-body);
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: #fff;
+	background: var(--edp-teal);
+	border: 1px solid var(--edp-teal);
+	border-radius: var(--edp-radius);
+	padding: 14px 20px;
+	font-size: 0.95rem;
+	transition: background 0.2s ease, color 0.2s ease;
+}
+
+.edp-submit:hover {
+	background: var(--edp-gold);
+	border-color: var(--edp-gold);
+	color: var(--edp-teal);
+}
+
+.edp-submit:disabled {
+	opacity: 0.6;
+	cursor: default;
+}
+
+/* Success */
+.edp-success {
+	text-align: center;
+	padding: 20px 8px;
+}
+
+.edp-success__icon {
+	width: 64px;
+	height: 64px;
+	line-height: 64px;
+	margin: 0 auto 14px;
+	border-radius: 50%;
+	background: var(--edp-gold);
+	color: var(--edp-teal);
+	font-size: 32px;
+}
+
+.edp-success__text {
+	color: var(--edp-teal);
+	font-size: 1.05rem;
+	margin-bottom: 18px;
+}
+
+@media (max-width: 480px) {
+	.edp-form .edp-grid {
+		grid-template-columns: 1fr;
+	}
+	.edp-modal__dialog {
+		padding: 28px 18px 20px;
+	}
+}
