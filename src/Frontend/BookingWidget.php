@@ -8,6 +8,7 @@
 namespace ErediExperienceBooking\Frontend;
 
 use ErediExperienceBooking\ProductType\ExperienceProduct;
+use ErediExperienceBooking\Support\Experiences;
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Group_Control_Typography;
@@ -90,21 +91,7 @@ class BookingWidget extends Widget_Base {
 	 * @return array<int,string>
 	 */
 	private function experience_options() {
-		$options  = array();
-		$products = wc_get_products(
-			array(
-				'type'   => 'experience',
-				'status' => 'publish',
-				'limit'  => -1,
-				'return' => 'objects',
-				'orderby' => 'title',
-				'order'   => 'ASC',
-			)
-		);
-		foreach ( $products as $product ) {
-			$options[ $product->get_id() ] = $product->get_name() . ' (#' . $product->get_id() . ')';
-		}
-		return $options;
+		return Experiences::options();
 	}
 
 	/**

@@ -82,10 +82,22 @@ class Registry {
 			);
 		}
 
+		$tiers = array();
+		foreach ( $product->get_price_tiers() as $tier ) {
+			$tiers[] = array(
+				'min'   => (int) $tier['min'],
+				'max'   => (int) $tier['max'],
+				'price' => (float) $tier['price'],
+			);
+		}
+
 		return array(
 			'id'               => $product->get_id(),
 			'name'             => $product->get_name(),
-			'price_per_person' => (float) $product->get_price_per_person(),
+			'tiers'            => $tiers,
+			'from_price'       => (float) $product->get_from_price(),
+			'price_per_person' => (float) $product->get_from_price(),
+			'duration'         => $product->get_duration(),
 			'min_persons'      => $product->get_min_persons(),
 			'max_persons'      => $product->get_max_persons(),
 			'upsells'          => $upsells,

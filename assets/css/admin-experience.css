@@ -1,4 +1,10 @@
-/* Admin product editor styles for the Experience booking plugin. */
+/* Admin product editor styles for the Experience booking plugin.
+ *
+ * Selectors that touch fields/labels/inputs are scoped under
+ * `.woocommerce_options_panel` so they out-rank WooCommerce's own panel rules
+ * (e.g. `.woocommerce_options_panel label { float:left; width:150px }`) which
+ * would otherwise break our custom repeater rows.
+ */
 
 /* Hide our tabs until JS confirms the experience product type (avoids flash). */
 li.edp-show-if-experience {
@@ -22,41 +28,65 @@ li.edp-show-if-experience {
 	padding: 9px 12px;
 }
 
-/* Generic flex field. */
-.edp-field {
+/* ---- Neutralise WooCommerce panel label/input rules inside our rows ---- */
+.woocommerce_options_panel .edp-window-row label,
+.woocommerce_options_panel .edp-option-row label,
+.woocommerce_options_panel .edp-upsell-head label,
+.woocommerce_options_panel .edp-weekday-toggle,
+.woocommerce_options_panel .edp-copy-box .edp-copy-sections label {
+	float: none !important;
+	width: auto !important;
+	margin: 0;
+	padding: 0;
+	line-height: 1.4;
+}
+
+.woocommerce_options_panel .edp-window-row input,
+.woocommerce_options_panel .edp-window-row select,
+.woocommerce_options_panel .edp-option-row input,
+.woocommerce_options_panel .edp-option-row select,
+.woocommerce_options_panel .edp-upsell-head input,
+.woocommerce_options_panel .edp-copy-box .edp-copy-source {
+	float: none !important;
+	width: 100%;
+	min-width: 0;
+	margin: 0;
+	box-sizing: border-box;
+}
+
+/* ---- Generic flex field (caption stacked above the control) ---- */
+.woocommerce_options_panel .edp-field {
 	display: inline-flex;
 	flex-direction: column;
 	margin: 0 10px 6px 0;
 	font-size: 12px;
 	color: #555;
+	vertical-align: top;
 }
 
-.edp-field > span {
+.woocommerce_options_panel .edp-field > span {
+	display: block;
 	margin-bottom: 3px;
 }
 
-.edp-field input[type="time"],
-.edp-field input[type="number"],
-.edp-field input[type="text"],
-.edp-field select {
-	min-width: 120px;
+.woocommerce_options_panel .edp-field input[type="time"],
+.woocommerce_options_panel .edp-field input[type="number"],
+.woocommerce_options_panel .edp-field input[type="text"],
+.woocommerce_options_panel .edp-field select {
+	min-width: 130px;
 }
 
-.edp-field.edp-grow {
-	flex: 1 1 220px;
+.woocommerce_options_panel .edp-field.edp-grow {
+	flex: 1 1 240px;
 }
 
-.edp-field.edp-grow input {
-	width: 100%;
-}
-
-/* Window rows. */
+/* ---- Window / option rows ---- */
 .edp-window-row,
 .edp-option-row {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: flex-end;
-	gap: 4px 0;
+	gap: 8px;
 	padding: 8px;
 	margin-bottom: 6px;
 	background: #fbfbfb;
@@ -64,7 +94,7 @@ li.edp-show-if-experience {
 	border-radius: 4px;
 }
 
-/* Weekday blocks. */
+/* ---- Weekday blocks ---- */
 .edp-weekday {
 	border: 1px solid #e1e1e1;
 	border-radius: 4px;
@@ -72,9 +102,12 @@ li.edp-show-if-experience {
 	background: #fff;
 }
 
-.edp-weekday-toggle {
+.woocommerce_options_panel .edp-weekday-toggle {
 	display: block;
+	float: none !important;
+	width: auto !important;
 	padding: 8px 10px;
+	margin: 0;
 	background: #f3f4f5;
 	border-bottom: 1px solid #e1e1e1;
 	cursor: pointer;
@@ -84,7 +117,7 @@ li.edp-show-if-experience {
 	padding: 10px;
 }
 
-/* Upsell cards. */
+/* ---- Upsell cards ---- */
 .edp-upsell-row {
 	border: 1px solid #c3c4c7;
 	border-left: 3px solid #002435;
@@ -97,7 +130,7 @@ li.edp-show-if-experience {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: flex-end;
-	gap: 0 6px;
+	gap: 8px;
 	padding: 10px;
 	background: #f6f7f7;
 	border-bottom: 1px solid #e1e1e1;
@@ -107,6 +140,7 @@ li.edp-show-if-experience {
 	padding: 10px 12px;
 }
 
+/* ---- Buttons ---- */
 .edp-remove {
 	color: #b32d2e !important;
 	border-color: #b32d2e !important;
@@ -124,7 +158,48 @@ li.edp-show-if-experience {
 	margin-top: 4px !important;
 }
 
-.edp-blackout {
+.woocommerce_options_panel textarea.edp-blackout {
 	width: 100%;
 	max-width: 320px;
+}
+
+/* ---- Copy-from-experience box ---- */
+.edp-copy-box {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-left: 3px solid #002435;
+	border-radius: 4px;
+	margin: 12px;
+	padding: 12px 14px !important;
+}
+
+.edp-copy-title {
+	margin: 0 0 8px;
+	color: #002435;
+}
+
+.woocommerce_options_panel .edp-copy-box .edp-copy-source {
+	min-width: 280px;
+	max-width: 100%;
+}
+
+.edp-copy-box .edp-copy-sections {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 18px;
+	margin: 4px 0 10px;
+}
+
+.woocommerce_options_panel .edp-copy-box .edp-copy-sections label {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	color: #3c434a;
+	font-weight: 500;
+}
+
+.edp-copy-box .description {
+	display: inline-block;
+	margin-left: 8px;
+	color: #777;
 }

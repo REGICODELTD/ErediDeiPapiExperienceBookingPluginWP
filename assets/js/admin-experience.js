@@ -48,8 +48,31 @@
 		} );
 	}
 
+	// Default product-data tabs that make no sense for an experience.
+	var HIDE_TABS = '.attribute_tab, .shipping_tab, .linked_product_tab';
+
+	// Hide those tabs for experiences; restore only the ones we hid (no
+	// regression on other product types). Run deferred so it executes AFTER
+	// WooCommerce's own product-type handler.
+	function hideDefaultTabs() {
+		var on = isExperience();
+		$( HIDE_TABS ).each( function () {
+			var $tab = $( this );
+			if ( on ) {
+				$tab.hide().attr( 'data-edp-hid', '1' );
+			} else if ( $tab.attr( 'data-edp-hid' ) ) {
+				$tab.show().removeAttr( 'data-edp-hid' );
+			}
+		} );
+	}
+
+	function deferHideTabs() {
+		window.setTimeout( hideDefaultTabs, 0 );
+	}
+
 	$( document )
 		.on( 'change', '#product-type', toggleType )
+		.on( 'change', '#product-type', deferHideTabs )
 		.on( 'change', '[data-edp-mode]', toggleMode )
 
 		// Per-weekday open toggle.
@@ -62,6 +85,12 @@
 			var prefix = $( this ).attr( 'data-name-prefix' );
 			var html = tpl( 'edp-tpl-window' ).split( '__PREFIX__' ).join( prefix ).split( '__WI__' ).join( nextId() );
 			$( this ).closest( '.edp-windows-block, .edp-weekday-windows' ).find( '[data-edp-rows]' ).first().append( html );
+		} )
+
+		// Add a price-tier row.
+		.on( 'click', '[data-edp-add-tier]', function () {
+			var html = tpl( 'edp-tpl-tier' ).split( '__TI__' ).join( nextId() );
+			$( this ).closest( '.options_group' ).find( '[data-edp-rows]' ).first().append( html );
 		} )
 
 		// Add an upsell.
@@ -86,9 +115,63 @@
 		.on( 'change', '[data-edp-option-mode]', function () {
 			var addon = 'addon' === $( this ).val();
 			$( this ).closest( '.edp-option-row' ).find( '.edp-extra-field' ).toggle( addon );
+		} )
+
+		// Copy settings from another experience.
+		.on( 'click', '[data-edp-copy]', function () {
+			if ( 'undefined' === typeof edpAdmin ) {
+				return;
+			}
+			var $btn = $( this );
+			var $box = $btn.closest( '.edp-copy-box' );
+			var source = $box.find( '[data-edp-copy-source]' ).val();
+			var target = $( '#post_ID' ).val();
+			var sections = $box
+				.find( '[data-edp-copy-section]:checked' )
+				.map( function () {
+					return this.value;
+				} )
+				.get();
+
+			if ( ! source ) {
+				window.alert( edpAdmin.i18n.selectSource );
+				return;
+			}
+			if ( ! sections.length ) {
+				window.alert( edpAdmin.i18n.selectSection );
+				return;
+			}
+			if ( ! window.confirm( edpAdmin.i18n.confirm ) ) {
+				return;
+			}
+
+			$btn.prop( 'disabled', true );
+			$.post( edpAdmin.ajaxUrl, {
+				action: 'edp_copy_experience_settings',
+				nonce: edpAdmin.nonce,
+				source_id: source,
+				target_id: target,
+				sections: sections
+			} )
+				.done( function ( res ) {
+					if ( res && res.success ) {
+						window.location.reload();
+					} else {
+						$btn.prop( 'disabled', false );
+						window.alert( res && res.data && res.data.message ? res.data.message : edpAdmin.i18n.error );
+					}
+				} )
+				.fail( function ( xhr ) {
+					$btn.prop( 'disabled', false );
+					var msg = xhr && xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message
+						? xhr.responseJSON.data.message
+						: edpAdmin.i18n.error;
+					window.alert( msg );
+				} );
 		} );
 
 	$( function () {
 		toggleType();
+		deferHideTabs();
 	} );
 } )( jQuery );

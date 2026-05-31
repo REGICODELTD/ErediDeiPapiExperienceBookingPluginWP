@@ -281,9 +281,29 @@
 		return selection;
 	}
 
+	// Resolve the per-person base price for a party size (mirrors PHP tiers).
+	function resolveTierPrice( cfg, persons ) {
+		var tiers = cfg.tiers || [];
+		if ( ! tiers.length ) {
+			return Number( cfg.from_price || cfg.price_per_person || 0 );
+		}
+		var chosen = tiers[ 0 ];
+		for ( var i = 0; i < tiers.length; i++ ) {
+			var t = tiers[ i ];
+			if ( persons >= t.min ) {
+				chosen = t;
+				if ( 0 === t.max || persons <= t.max ) {
+					return Number( t.price );
+				}
+			}
+		}
+		return Number( chosen.price );
+	}
+
 	function recalcTotal() {
 		var persons = parseInt( qs( 'input[name="persons"]', modal ).value, 10 ) || 0;
-		var perPerson = current.price_per_person || 0;
+		var base = resolveTierPrice( current, persons );
+		var perPerson = base;
 
 		collectSelection().forEach( function ( sel ) {
 			var upsell = current.upsells[ sel.index ];
@@ -299,8 +319,11 @@
 			} );
 		} );
 
-		var total = perPerson * persons;
-		qs( '[data-edp-total]', modal ).textContent = persons > 0 ? formatPrice( total ) : '—';
+		var ppEl = qs( '[data-edp-perperson]', modal );
+		if ( ppEl ) {
+			ppEl.textContent = persons > 0 ? formatPrice( base ) : '—';
+		}
+		qs( '[data-edp-total]', modal ).textContent = persons > 0 ? formatPrice( perPerson * persons ) : '—';
 	}
 
 	/* ------------------------------------------------------------------ */

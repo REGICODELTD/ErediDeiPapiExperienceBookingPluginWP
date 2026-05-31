@@ -7,6 +7,7 @@
 
 namespace ErediExperienceBooking;
 
+use ErediExperienceBooking\Admin\CopySettings;
 use ErediExperienceBooking\Admin\OrderAdmin;
 use ErediExperienceBooking\Admin\ProductDataPanels;
 use ErediExperienceBooking\Admin\ProductDataSave;
@@ -87,6 +88,7 @@ final class Plugin {
 			( new ProductDataPanels() )->register();
 			( new ProductDataSave() )->register();
 			( new OrderAdmin() )->register();
+			( new CopySettings() )->register();
 		}
 	}
 }

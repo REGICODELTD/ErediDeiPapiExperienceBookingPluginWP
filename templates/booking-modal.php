@@ -92,6 +92,11 @@ $edp_privacy_url = function_exists( 'get_privacy_policy_url' ) ? get_privacy_pol
 				</span>
 			</label>
 
+			<div class="edp-perperson">
+				<span class="edp-perperson-label"><?php esc_html_e( 'Prezzo a persona', 'eredi-experience-booking' ); ?></span>
+				<span class="edp-perperson-amount" data-edp-perperson>&mdash;</span>
+			</div>
+
 			<div class="edp-total">
 				<span class="edp-total-label"><?php esc_html_e( 'Totale', 'eredi-experience-booking' ); ?></span>
 				<span class="edp-total-amount" data-edp-total>&mdash;</span>

@@ -35,22 +35,109 @@ class ProductDataSave {
 		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- handled by WooCommerce core.
-		$price = isset( $_POST['_edp_price_per_person'] ) ? wc_format_decimal( wp_unslash( $_POST['_edp_price_per_person'] ) ) : '';
-		$min   = isset( $_POST['_edp_min_persons'] ) ? max( 1, absint( $_POST['_edp_min_persons'] ) ) : 1;
-		$max   = isset( $_POST['_edp_max_persons'] ) ? absint( $_POST['_edp_max_persons'] ) : 0;
+		$tiers    = $this->sanitize_tiers( isset( $_POST['_edp_price_tiers'] ) ? wp_unslash( $_POST['_edp_price_tiers'] ) : array() );
+		$duration = isset( $_POST['_edp_duration'] ) ? sanitize_text_field( wp_unslash( $_POST['_edp_duration'] ) ) : '';
 
 		$availability = $this->sanitize_availability( isset( $_POST['_edp_availability'] ) ? wp_unslash( $_POST['_edp_availability'] ) : array() );
 		$upsells      = $this->sanitize_upsells( isset( $_POST['_edp_upsells'] ) ? wp_unslash( $_POST['_edp_upsells'] ) : array() );
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
-		$product->set_regular_price( '' !== $price ? $price : '' );
-		$product->set_price( '' !== $price ? $price : '' );
+		$from = $this->tiers_from_price( $tiers );
+		$min  = $this->tiers_min( $tiers );
+		$max  = $this->tiers_max( $tiers );
 
-		$product->update_meta_data( '_edp_price_per_person', '' !== $price ? $price : 0 );
+		$product->set_regular_price( $from > 0 ? $from : '' );
+		$product->set_price( $from > 0 ? $from : '' );
+
+		$product->update_meta_data( '_edp_price_tiers', $tiers );
+		$product->update_meta_data( '_edp_duration', $duration );
+		// Derived legacy values (backward compatibility + WooCommerce price).
+		$product->update_meta_data( '_edp_price_per_person', $from );
 		$product->update_meta_data( '_edp_min_persons', $min );
 		$product->update_meta_data( '_edp_max_persons', $max );
 		$product->update_meta_data( '_edp_availability', $availability );
 		$product->update_meta_data( '_edp_upsells', $upsells );
+	}
+
+	/**
+	 * Sanitize the price tiers payload (ordered by ascending `min`).
+	 *
+	 * @param mixed $rows Raw rows.
+	 * @return array[]
+	 */
+	private function sanitize_tiers( $rows ) {
+		if ( ! is_array( $rows ) ) {
+			return array();
+		}
+		$clean = array();
+		foreach ( $rows as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+			$price = isset( $row['price'] ) ? (float) wc_format_decimal( $row['price'] ) : 0.0;
+			if ( $price <= 0 ) {
+				continue; // Skip tiers without a price.
+			}
+			$min = isset( $row['min'] ) ? absint( $row['min'] ) : 0;
+			$clean[] = array(
+				'min'   => $min > 0 ? $min : 1,
+				'max'   => isset( $row['max'] ) ? absint( $row['max'] ) : 0,
+				'price' => $price,
+			);
+		}
+		usort(
+			$clean,
+			static function ( $a, $b ) {
+				return $a['min'] <=> $b['min'];
+			}
+		);
+		return array_values( $clean );
+	}
+
+	/**
+	 * Lowest tier price.
+	 *
+	 * @param array[] $tiers Sanitized tiers.
+	 * @return float
+	 */
+	private function tiers_from_price( array $tiers ) {
+		$min = null;
+		foreach ( $tiers as $tier ) {
+			if ( null === $min || $tier['price'] < $min ) {
+				$min = $tier['price'];
+			}
+		}
+		return null === $min ? 0.0 : (float) $min;
+	}
+
+	/**
+	 * Minimum bookable people (first tier min).
+	 *
+	 * @param array[] $tiers Sanitized tiers (sorted).
+	 * @return int
+	 */
+	private function tiers_min( array $tiers ) {
+		return empty( $tiers ) ? 1 : max( 1, (int) $tiers[0]['min'] );
+	}
+
+	/**
+	 * Maximum bookable people (0 = unlimited when any tier is open-ended).
+	 *
+	 * @param array[] $tiers Sanitized tiers.
+	 * @return int
+	 */
+	private function tiers_max( array $tiers ) {
+		if ( empty( $tiers ) ) {
+			return 0;
+		}
+		$max = 0;
+		foreach ( $tiers as $tier ) {
+			if ( 0 === (int) $tier['max'] ) {
+				return 0;
+			}
+			$max = max( $max, (int) $tier['max'] );
+		}
+		return $max;
 	}
 
 	/**

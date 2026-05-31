@@ -8,6 +8,7 @@
 namespace ErediExperienceBooking\Admin;
 
 use ErediExperienceBooking\ProductType\ExperienceProduct;
+use ErediExperienceBooking\Support\Experiences;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -89,6 +90,21 @@ class ProductDataPanels {
 
 		wp_enqueue_style( 'edp-admin', EDP_URL . 'assets/css/admin-experience.css', array(), EDP_VERSION );
 		wp_enqueue_script( 'edp-admin', EDP_URL . 'assets/js/admin-experience.js', array( 'jquery' ), EDP_VERSION, true );
+
+		wp_localize_script(
+			'edp-admin',
+			'edpAdmin',
+			array(
+				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+				'nonce'   => wp_create_nonce( 'edp_copy_settings' ),
+				'i18n'    => array(
+					'selectSource'  => __( 'Seleziona un’esperienza sorgente.', 'eredi-experience-booking' ),
+					'selectSection' => __( 'Seleziona almeno una sezione da copiare.', 'eredi-experience-booking' ),
+					'confirm'       => __( 'Copiare le impostazioni selezionate? Le sezioni scelte di questo prodotto verranno sovrascritte e la scheda verrà ricaricata. Salva prima eventuali altre modifiche.', 'eredi-experience-booking' ),
+					'error'         => __( 'Errore durante la copia. Riprova.', 'eredi-experience-booking' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -99,64 +115,128 @@ class ProductDataPanels {
 		$product = $post ? wc_get_product( $post->ID ) : null;
 		$product = ( $product instanceof ExperienceProduct ) ? $product : null;
 
-		$price   = $product ? $product->get_price_per_person() : '';
-		$min     = $product ? $product->get_min_persons() : 1;
-		$max     = $product ? $product->get_max_persons() : '';
-		$avail   = $product ? $product->get_availability_config() : array();
-		$upsells = $product ? $product->get_upsells_config() : array();
+		$duration = $product ? $product->get_duration() : '';
+		$tiers    = $product ? $product->get_price_tiers() : array();
+		$avail    = $product ? $product->get_availability_config() : array();
+		$upsells  = $product ? $product->get_upsells_config() : array();
 
-		$this->render_experience_panel( $price, $min, $max );
+		$this->render_experience_panel( $duration, $tiers );
 		$this->render_availability_panel( $avail );
 		$this->render_upsells_panel( $upsells );
 		$this->render_templates();
 	}
 
 	/**
-	 * Esperienza tab: price per person + min/max people.
-	 *
-	 * @param mixed $price Price per person.
-	 * @param mixed $min   Min people.
-	 * @param mixed $max   Max people.
+	 * "Copy from another experience" box (top of the Esperienza tab).
+	 * Hidden when there is no other experience to copy from.
 	 */
-	private function render_experience_panel( $price, $min, $max ) {
+	private function render_copy_panel() {
+		global $post;
+		$current_id = $post ? (int) $post->ID : 0;
+		$options    = Experiences::options( $current_id, array( 'publish', 'draft', 'private' ) );
+		if ( empty( $options ) ) {
+			return;
+		}
+
+		$sections = array(
+			'pricing'      => __( 'Prezzo, durata e persone', 'eredi-experience-booking' ),
+			'availability' => __( 'Disponibilità', 'eredi-experience-booking' ),
+			'upsells'      => __( 'Upsell & allestimenti', 'eredi-experience-booking' ),
+		);
+		?>
+		<div class="options_group edp-copy-box">
+			<p class="edp-copy-title"><strong><?php esc_html_e( 'Copia da un’altra esperienza', 'eredi-experience-booking' ); ?></strong></p>
+
+			<p class="form-field">
+				<select class="edp-copy-source" data-edp-copy-source>
+					<option value=""><?php esc_html_e( '— Seleziona esperienza —', 'eredi-experience-booking' ); ?></option>
+					<?php foreach ( $options as $id => $label ) : ?>
+						<option value="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			</p>
+
+			<p class="form-field edp-copy-sections">
+				<?php foreach ( $sections as $key => $label ) : ?>
+					<label><input type="checkbox" data-edp-copy-section value="<?php echo esc_attr( $key ); ?>" checked /> <?php echo esc_html( $label ); ?></label>
+				<?php endforeach; ?>
+			</p>
+
+			<p class="form-field">
+				<button type="button" class="button button-secondary" data-edp-copy><?php esc_html_e( 'Copia impostazioni', 'eredi-experience-booking' ); ?></button>
+				<span class="description"><?php esc_html_e( 'Sovrascrive le sezioni selezionate di questo prodotto e ricarica la scheda.', 'eredi-experience-booking' ); ?></span>
+			</p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Esperienza tab: duration + per-person price tiers (min/max derived from tiers).
+	 *
+	 * @param string $duration Free-text duration.
+	 * @param array  $tiers    Price tiers.
+	 */
+	private function render_experience_panel( $duration, array $tiers ) {
 		?>
 		<div id="edp_experience_data" class="panel woocommerce_options_panel edp-show-if-experience">
+			<?php $this->render_copy_panel(); ?>
+
 			<div class="options_group">
 				<?php
 				woocommerce_wp_text_input(
 					array(
-						'id'          => '_edp_price_per_person',
-						'value'       => '' !== $price ? wc_format_localized_price( $price ) : '',
-						'label'       => __( 'Prezzo a persona', 'eredi-experience-booking' ) . ' (' . get_woocommerce_currency_symbol() . ')',
-						'data_type'   => 'price',
+						'id'          => '_edp_duration',
+						'value'       => $duration,
+						'label'       => __( 'Durata', 'eredi-experience-booking' ),
+						'placeholder' => __( 'es. 2 ore', 'eredi-experience-booking' ),
 						'desc_tip'    => true,
-						'description' => __( 'Prezzo base applicato per ogni persona della prenotazione.', 'eredi-experience-booking' ),
-					)
-				);
-				woocommerce_wp_text_input(
-					array(
-						'id'                => '_edp_min_persons',
-						'value'             => $min,
-						'label'             => __( 'Persone minime', 'eredi-experience-booking' ),
-						'type'              => 'number',
-						'custom_attributes' => array( 'min' => '1', 'step' => '1' ),
-						'desc_tip'          => true,
-						'description'       => __( 'Numero minimo di persone prenotabili.', 'eredi-experience-booking' ),
-					)
-				);
-				woocommerce_wp_text_input(
-					array(
-						'id'                => '_edp_max_persons',
-						'value'             => $max,
-						'label'             => __( 'Persone massime', 'eredi-experience-booking' ),
-						'type'              => 'number',
-						'custom_attributes' => array( 'min' => '0', 'step' => '1' ),
-						'desc_tip'          => true,
-						'description'       => __( 'Numero massimo di persone (0 = nessun limite).', 'eredi-experience-booking' ),
+						'description' => __( 'Durata indicativa dell’esperienza (testo libero), mostrata nel widget.', 'eredi-experience-booking' ),
 					)
 				);
 				?>
 			</div>
+
+			<div class="options_group">
+				<p class="edp-block-desc"><?php esc_html_e( 'Definisci il prezzo a persona per scaglioni di numero di persone. Il minimo e il massimo prenotabili sono derivati dagli scaglioni: l’ultimo scaglione senza valore in "A" significa "nessun limite" (es. 6+).', 'eredi-experience-booking' ); ?></p>
+				<span class="edp-block-title"><?php esc_html_e( 'Scaglioni di prezzo (a persona)', 'eredi-experience-booking' ); ?></span>
+				<div class="edp-tiers" data-edp-rows>
+					<?php
+					foreach ( $tiers as $i => $tier ) {
+						$this->render_tier_row( $i, $tier );
+					}
+					?>
+				</div>
+				<button type="button" class="button edp-add-tier" data-edp-add-tier>
+					<?php esc_html_e( '+ Aggiungi scaglione', 'eredi-experience-booking' ); ?>
+				</button>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render a single price-tier row.
+	 *
+	 * @param mixed $index Row index (numeric or placeholder).
+	 * @param array $tier  Tier values.
+	 */
+	private function render_tier_row( $index, $tier = array() ) {
+		$min   = isset( $tier['min'] ) && (int) $tier['min'] > 0 ? (int) $tier['min'] : '';
+		$max   = isset( $tier['max'] ) && (int) $tier['max'] > 0 ? (int) $tier['max'] : '';
+		$price = isset( $tier['price'] ) ? $tier['price'] : '';
+		$base  = '_edp_price_tiers[' . $index . ']';
+		?>
+		<div class="edp-window-row edp-tier-row" data-edp-row>
+			<label class="edp-field"><span><?php esc_html_e( 'Da (persone)', 'eredi-experience-booking' ); ?></span>
+				<input type="number" min="1" step="1" name="<?php echo esc_attr( $base ); ?>[min]" value="<?php echo esc_attr( $min ); ?>" />
+			</label>
+			<label class="edp-field"><span><?php esc_html_e( 'A (persone)', 'eredi-experience-booking' ); ?></span>
+				<input type="number" min="0" step="1" name="<?php echo esc_attr( $base ); ?>[max]" value="<?php echo esc_attr( $max ); ?>" placeholder="+" />
+			</label>
+			<label class="edp-field"><span><?php esc_html_e( 'Prezzo a persona', 'eredi-experience-booking' ); ?> (<?php echo esc_html( get_woocommerce_currency_symbol() ); ?>)</span>
+				<input type="text" class="wc_input_price" name="<?php echo esc_attr( $base ); ?>[price]" value="<?php echo esc_attr( '' !== $price ? wc_format_localized_price( $price ) : '' ); ?>" />
+			</label>
+			<button type="button" class="button edp-remove" data-edp-remove title="<?php esc_attr_e( 'Rimuovi', 'eredi-experience-booking' ); ?>">&times;</button>
 		</div>
 		<?php
 	}
@@ -407,6 +487,10 @@ class ProductDataPanels {
 	private function render_templates() {
 		echo '<script type="text/html" id="edp-tpl-window">';
 		$this->render_window_row( '__PREFIX__', '__WI__', array() );
+		echo '</script>';
+
+		echo '<script type="text/html" id="edp-tpl-tier">';
+		$this->render_tier_row( '__TI__', array() );
 		echo '</script>';
 
 		echo '<script type="text/html" id="edp-tpl-upsell">';

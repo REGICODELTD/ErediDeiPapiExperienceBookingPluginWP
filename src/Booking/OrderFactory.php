@@ -66,6 +66,7 @@ class OrderFactory {
 		$line->set_subtotal_tax( 0 );
 		$line->set_total_tax( 0 );
 		$line->add_meta_data( __( 'Persone', 'eredi-experience-booking' ), $persons );
+		$line->add_meta_data( __( 'Prezzo a persona', 'eredi-experience-booking' ), html_entity_decode( wp_strip_all_tags( wc_price( $breakdown['price_per_person'] ) ) ) );
 		$line->add_meta_data( __( 'Data', 'eredi-experience-booking' ), $human_date );
 		$line->add_meta_data( __( 'Orario', 'eredi-experience-booking' ), $slot );
 		$order->add_item( $line );
@@ -94,6 +95,7 @@ class OrderFactory {
 			array(
 				'experience_id'   => $product->get_id(),
 				'experience_name' => $product->get_name(),
+				'duration'        => $product->get_duration(),
 				'date'            => $date,
 				'date_human'      => $human_date,
 				'slot'            => $slot,

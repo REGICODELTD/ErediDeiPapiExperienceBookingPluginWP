@@ -33,7 +33,7 @@ class PriceCalculator {
 	 */
 	public function build_breakdown( ExperienceProduct $product, $persons, array $selection ) {
 		$persons          = max( 1, (int) $persons );
-		$price_per_person = round( (float) $product->get_price_per_person(), wc_get_price_decimals() );
+		$price_per_person = round( (float) $product->resolve_price_per_person( $persons ), wc_get_price_decimals() );
 		$config_upsells   = $product->get_upsells_config();
 
 		$breakdown = array(

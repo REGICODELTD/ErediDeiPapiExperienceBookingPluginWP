@@ -5,7 +5,7 @@ Tested up to: 6.7
 Requires PHP: 7.4
 WC requires at least: 8.0
 WC tested up to: 10.7
-Stable tag: 1.0.0
+Stable tag: 1.0.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,17 +28,26 @@ Compatibile con HPOS (High-Performance Order Storage).
 
 == Caratteristiche ==
 
-* Tipo prodotto "Esperienza" con prezzo a persona e min/max persone.
+* Tipo prodotto "Esperienza" con prezzo a persona a scaglioni (per n° persone), durata e min/max derivati.
 * Upsell multipli per esperienza, ognuno con allestimenti (inclusi o a sovrapprezzo per persona).
 * Slot orari configurabili (finestre con intervallo e max prenotazioni per slot).
 * Tre modalità di disponibilità: evento / sempre disponibile (settimanale) / intervallo di date,
   con date di chiusura (blackout) e anticipo minimo.
+* Strumento "Copia da un'altra esperienza" nella scheda prodotto (sezioni selezionabili: prezzo/persone, disponibilità, upsell).
 * Widget Elementor nativo con controlli di stile + shortcode di fallback.
 * Modale di prenotazione con calcolo prezzo live e protezione anti-spam (honeypot + nonce).
 * Stati ordine personalizzati e 4 email transazionali (cliente: ricevuta/confermata/rifiutata;
   admin: nuova prenotazione).
 
 == Changelog ==
+
+= 1.0.2 =
+* Prezzo a persona a scaglioni per numero di persone (es. 2 → €40, 3-5 → €35, 6+ → €32).
+* Min/max persone derivati dagli scaglioni; nuovo campo "Durata" mostrato nel widget.
+
+= 1.0.1 =
+* Fix layout dei pannelli custom nell'editor prodotto (specificità CSS vs WooCommerce).
+* Nascosti i tab Attributi, Spedizione e Articoli collegati per il tipo Esperienza.
 
 = 1.0.0 =
 * Prima versione.
