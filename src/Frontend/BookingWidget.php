@@ -685,6 +685,8 @@ class BookingWidget extends Widget_Base {
 			return;
 		}
 
+		$modal = $this->modal_config( $settings );
+
 		echo WidgetView::render( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- template escapes.
 			$product,
 			array(
@@ -693,8 +695,57 @@ class BookingWidget extends Widget_Base {
 				'button_text'  => $settings['button_text'] ?? __( 'Prenota ora', 'eredi-experience-booking' ),
 				'price_prefix' => $settings['price_prefix'] ?? '',
 				'price_suffix' => $settings['price_suffix'] ?? '',
-				'modal'        => $this->modal_config( $settings ),
+				'modal'        => $modal,
 			)
 		);
+
+		// Inside the Elementor editor, also show an inline, always-open copy of the
+		// modal so the admin sees their copy + styling live. Never ships to visitors.
+		if ( \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
+			echo $this->render_modal_preview( $product, $modal ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped within.
+		}
+	}
+
+	/**
+	 * Inline, always-open copy of the modal shown only inside the Elementor
+	 * editor. The style controls write the CSS custom properties onto
+	 * `.edp-modal-preview` via Elementor selectors, so colours/radius/fonts
+	 * update instantly; the copy here updates on the editor's template re-render.
+	 *
+	 * @param ExperienceProduct $product Experience.
+	 * @param array             $modal   Sanitized modal config.
+	 * @return string
+	 */
+	private function render_modal_preview( ExperienceProduct $product, array $modal ) {
+		$text    = isset( $modal['text'] ) ? $modal['text'] : array();
+		$submit  = ( isset( $text['submit'] ) && '' !== $text['submit'] ) ? $text['submit'] : __( 'Invia richiesta di prenotazione', 'eredi-experience-booking' );
+		$close   = ( isset( $text['closeAria'] ) && '' !== $text['closeAria'] ) ? $text['closeAria'] : __( 'Chiudi', 'eredi-experience-booking' );
+		$heading = ( isset( $text['upsellsHeading'] ) && '' !== $text['upsellsHeading'] ) ? $text['upsellsHeading'] : __( 'Upsell & allestimenti', 'eredi-experience-booking' );
+
+		ob_start();
+		?>
+		<div class="edp-modal-preview-wrap">
+			<span class="edp-modal-preview-caption"><?php esc_html_e( 'Anteprima modale (solo editor)', 'eredi-experience-booking' ); ?></span>
+			<div class="edp-modal-preview">
+				<button type="button" class="edp-modal__close" aria-label="<?php echo esc_attr( $close ); ?>" tabindex="-1">&times;</button>
+				<h3 class="edp-modal__title"><?php echo esc_html( $product->get_name() ); ?></h3>
+				<div class="edp-form">
+					<div class="edp-grid">
+						<div class="edp-f">
+							<label><?php esc_html_e( 'Numero di persone', 'eredi-experience-booking' ); ?></label>
+							<input type="text" value="2" readonly tabindex="-1" />
+						</div>
+						<div class="edp-f">
+							<label><?php esc_html_e( 'Data', 'eredi-experience-booking' ); ?></label>
+							<input type="text" value="2026-06-01" readonly tabindex="-1" />
+						</div>
+					</div>
+					<div class="edp-upsells-title"><?php echo esc_html( $heading ); ?></div>
+					<button type="button" class="edp-submit" tabindex="-1"><?php echo esc_html( $submit ); ?></button>
+				</div>
+			</div>
+		</div>
+		<?php
+		return ob_get_clean();
 	}
 }

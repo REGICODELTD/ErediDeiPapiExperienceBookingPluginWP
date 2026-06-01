@@ -528,3 +528,34 @@ body.edp-modal-open {
 	border-color: var(--edp-btn-bg, var(--edp-teal));
 	color: var(--edp-btn-text, #fff);
 }
+
+/* ---------- Elementor editor: inline modal preview ----------
+   Only rendered inside the editor (guarded by is_edit_mode() in the widget).
+   The modal style controls write the --edp-* custom properties onto
+   .edp-modal-preview via Elementor selectors, and the descendants below inherit
+   them, so the preview restyles live as the admin edits. Inert on the live site
+   (no .edp-modal-preview element is ever printed there). */
+.edp-modal-preview-wrap {
+	margin-top: 16px;
+}
+
+.edp-modal-preview-caption {
+	display: block;
+	margin-bottom: 6px;
+	font-size: 11px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: #9aa0a6;
+}
+
+.edp-modal-preview {
+	position: relative;
+	max-width: 560px;
+	background: var(--edp-cream);
+	border: 1px solid var(--edp-border);
+	border-radius: var(--edp-dialog-radius, 6px);
+	box-shadow: 0 24px 60px rgba(0, 0, 0, 0.15);
+	padding: 32px 28px 28px;
+	color: var(--edp-ink);
+	font-family: var(--edp-font-body);
+}
