@@ -15,6 +15,28 @@
 	var modal;
 	var current = null; // current experience config.
 
+	// Upsells heading; overridden per-experience by the widget config.
+	var upsellsHeading = 'Upsell & allestimenti';
+
+	// Every CSS custom property the modal exposes, with values mirroring the
+	// CSS :root defaults. We set ALL of them on each open (falling back to
+	// these) so one experience's styling never bleeds into the next.
+	var MODAL_STYLE_DEFAULTS = {
+		'--edp-overlay': 'rgba(0, 36, 53, 0.55)',
+		'--edp-cream': '#f9f7f3',
+		'--edp-teal': '#002435',
+		'--edp-ink': '#1e1e1e',
+		'--edp-border': '#e6e1d8',
+		'--edp-btn-bg': '#002435',
+		'--edp-btn-text': '#fff',
+		'--edp-btn-bg-hover': '#feca91',
+		'--edp-btn-text-hover': '#002435',
+		'--edp-dialog-radius': '6px',
+		'--edp-radius': '4px',
+		'--edp-font-head': '"Roboto Slab", "Cardo", Georgia, serif',
+		'--edp-font-body': '"Roboto", -apple-system, system-ui, sans-serif'
+	};
+
 	/* ------------------------------------------------------------------ */
 	/* Helpers                                                            */
 	/* ------------------------------------------------------------------ */
@@ -78,12 +100,46 @@
 	/* Open / close                                                       */
 	/* ------------------------------------------------------------------ */
 
+	// Apply the per-experience modal copy + styling. Text via textContent/
+	// setAttribute (never innerHTML); styling via inline custom properties so it
+	// cascades to every modal element. Every var is set on each call to avoid
+	// bleed between experiences that share the single modal node.
+	function applyModalConfig( cfg ) {
+		var m = cfg || {};
+		var text = m.text || {};
+		var style = m.style || {};
+
+		Object.keys( MODAL_STYLE_DEFAULTS ).forEach( function ( name ) {
+			var value = style[ name ];
+			modal.style.setProperty(
+				name,
+				value === undefined || value === null || value === '' ? MODAL_STYLE_DEFAULTS[ name ] : value
+			);
+		} );
+
+		upsellsHeading = text.upsellsHeading || 'Upsell & allestimenti';
+
+		var submitBtn = qs( '.edp-form .edp-submit', modal );
+		if ( submitBtn && text.submit ) {
+			submitBtn.textContent = text.submit;
+		}
+		var successBtn = qs( '.edp-success .edp-submit', modal );
+		if ( successBtn && text.successClose ) {
+			successBtn.textContent = text.successClose;
+		}
+		var closeBtn = qs( '.edp-modal__close', modal );
+		if ( closeBtn && text.closeAria ) {
+			closeBtn.setAttribute( 'aria-label', text.closeAria );
+		}
+	}
+
 	function openModal( id ) {
 		current = EXP[ id ];
 		if ( ! current ) {
 			return;
 		}
 
+		applyModalConfig( current.modal );
 		resetForm();
 		qs( '.edp-modal__title', modal ).textContent = current.name;
 		qs( 'input[name="experience_id"]', modal ).value = current.id;
@@ -165,7 +221,7 @@
 
 		var title = document.createElement( 'div' );
 		title.className = 'edp-upsells-title';
-		title.textContent = 'Upsell & allestimenti';
+		title.textContent = upsellsHeading;
 		wrap.appendChild( title );
 
 		current.upsells.forEach( function ( upsell, u ) {

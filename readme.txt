@@ -5,7 +5,7 @@ Tested up to: 6.7
 Requires PHP: 7.4
 WC requires at least: 8.0
 WC tested up to: 10.7
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,11 +35,20 @@ Compatibile con HPOS (High-Performance Order Storage).
   con date di chiusura (blackout) e anticipo minimo.
 * Strumento "Copia da un'altra esperienza" nella scheda prodotto (sezioni selezionabili: prezzo/persone, disponibilità, upsell).
 * Widget Elementor nativo con controlli di stile + shortcode di fallback.
-* Modale di prenotazione con calcolo prezzo live e protezione anti-spam (honeypot + nonce).
+* Modale di prenotazione personalizzabile dal widget (testi dei pulsanti, colori, font e raggi)
+  con anteprima live nell'editor, calcolo prezzo live e protezione anti-spam (honeypot + nonce).
 * Stati ordine personalizzati e 4 email transazionali (cliente: ricevuta/confermata/rifiutata;
   admin: nuova prenotazione).
 
 == Changelog ==
+
+= 1.0.3 =
+* Personalizzazione del modale dal widget Elementor: testo dei pulsanti (invio, chiudi),
+  etichetta di chiusura e titolo della sezione upsell; colori (overlay, sfondo finestra,
+  accento, pulsante normale/hover), raggi di finestra e campi, font di titoli e testo.
+* Anteprima live del modale nell'editor Elementor.
+* Nota: i font scelti devono essere già caricati dal tema; un font Google non incluso non
+  viene accodato automaticamente (si applica il fallback dello stack tipografico).
 
 = 1.0.2 =
 * Prezzo a persona a scaglioni per numero di persone (es. 2 → €40, 3-5 → €35, 6+ → €32).
