@@ -3,7 +3,7 @@
  * Plugin Name:       Eredi dei Papi – Experience Booking
  * Plugin URI:        https://eredideipapiexperience.it/
  * Description:        Sistema di prenotazione esperienze per WooCommerce: tipo prodotto "Esperienza" con prezzo a persona, upsell/allestimenti, slot orari configurabili, modale di prenotazione (widget Elementor) e gestione conferma/rifiuto via ordini WooCommerce.
- * Version:           1.0.2
+ * Version:           1.0.3
  * Author:            Regicode
  * Author URI:        https://regicode.com/
  * License:           GPL-2.0-or-later
@@ -20,7 +20,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'EDP_VERSION', '1.0.2' );
+define( 'EDP_VERSION', '1.0.3' );
 define( 'EDP_FILE', __FILE__ );
 define( 'EDP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'EDP_URL', plugin_dir_url( __FILE__ ) );
